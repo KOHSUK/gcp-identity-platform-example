@@ -16,16 +16,28 @@ import { Route as rootRoute } from './routes/__root'
 
 // Create Virtual Routes
 
+const LogoutLazyImport = createFileRoute('/logout')()
 const LoginLazyImport = createFileRoute('/login')()
+const ConsentLazyImport = createFileRoute('/consent')()
 const AboutLazyImport = createFileRoute('/about')()
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
 
+const LogoutLazyRoute = LogoutLazyImport.update({
+  path: '/logout',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/logout.lazy').then((d) => d.Route))
+
 const LoginLazyRoute = LoginLazyImport.update({
   path: '/login',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
+
+const ConsentLazyRoute = ConsentLazyImport.update({
+  path: '/consent',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/consent.lazy').then((d) => d.Route))
 
 const AboutLazyRoute = AboutLazyImport.update({
   path: '/about',
@@ -55,11 +67,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutLazyImport
       parentRoute: typeof rootRoute
     }
+    '/consent': {
+      id: '/consent'
+      path: '/consent'
+      fullPath: '/consent'
+      preLoaderRoute: typeof ConsentLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/logout': {
+      id: '/logout'
+      path: '/logout'
+      fullPath: '/logout'
+      preLoaderRoute: typeof LogoutLazyImport
       parentRoute: typeof rootRoute
     }
   }
@@ -70,41 +96,51 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
+  '/consent': typeof ConsentLazyRoute
   '/login': typeof LoginLazyRoute
+  '/logout': typeof LogoutLazyRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
+  '/consent': typeof ConsentLazyRoute
   '/login': typeof LoginLazyRoute
+  '/logout': typeof LogoutLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
   '/about': typeof AboutLazyRoute
+  '/consent': typeof ConsentLazyRoute
   '/login': typeof LoginLazyRoute
+  '/logout': typeof LogoutLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/login'
+  fullPaths: '/' | '/about' | '/consent' | '/login' | '/logout'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/login'
-  id: '__root__' | '/' | '/about' | '/login'
+  to: '/' | '/about' | '/consent' | '/login' | '/logout'
+  id: '__root__' | '/' | '/about' | '/consent' | '/login' | '/logout'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
   AboutLazyRoute: typeof AboutLazyRoute
+  ConsentLazyRoute: typeof ConsentLazyRoute
   LoginLazyRoute: typeof LoginLazyRoute
+  LogoutLazyRoute: typeof LogoutLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
   AboutLazyRoute: AboutLazyRoute,
+  ConsentLazyRoute: ConsentLazyRoute,
   LoginLazyRoute: LoginLazyRoute,
+  LogoutLazyRoute: LogoutLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -121,7 +157,9 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/about",
-        "/login"
+        "/consent",
+        "/login",
+        "/logout"
       ]
     },
     "/": {
@@ -130,8 +168,14 @@ export const routeTree = rootRoute
     "/about": {
       "filePath": "about.lazy.tsx"
     },
+    "/consent": {
+      "filePath": "consent.lazy.tsx"
+    },
     "/login": {
       "filePath": "login.lazy.tsx"
+    },
+    "/logout": {
+      "filePath": "logout.lazy.tsx"
     }
   }
 }

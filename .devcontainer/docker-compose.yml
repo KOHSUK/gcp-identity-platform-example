@@ -2,6 +2,9 @@ version: '3.8'
 
 volumes:
   postgres-data:
+  pgadmin-data:
+networks:
+  intranet:
 
 services:
   app:
@@ -27,12 +30,65 @@ services:
   db:
     image: postgres:latest
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d
     env_file:
       # Ensure that the variables in .env match the same variables in devcontainer.json
       - .env
+    networks:
+      - intranet
 
+  hydra:
+    image: oryd/hydra:v2.2.0
+    ports:
+      - "4444:4444" # Public port
+      - "4445:4445" # Admin port
+      - "5555:5555" # Port for hydra token user
+    command: serve -c /etc/config/hydra/hydra.yml all --dev
+    volumes:
+      - type: bind
+        source: ../ory/config/hydra
+        target: /etc/config/hydra
+    environment:
+      - DSN=postgres://hydra:hydra@db:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+    restart: unless-stopped
+    depends_on:
+      - db
+      - hydra-migrate
+    networks:
+      - intranet
 
-    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
+  hydra-migrate:
+    image: oryd/hydra:v2.2.0
+    environment:
+      - DSN=postgres://hydra:hydra@db:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    volumes:
+      - type: bind
+        source: ../ory/config/hydra
+        target: /etc/config/hydra
+    restart: on-failure
+    depends_on:
+      - db
+    networks:
+      - intranet
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 8888:80
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    hostname: pgadmin
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - intranet
+
