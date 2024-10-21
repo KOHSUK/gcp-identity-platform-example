@@ -4,10 +4,13 @@
 			"path": "."
 		},
 		{
-			"path": "web",
+			"path": "web"
 		},
 		{
 			"path": "ory"
+		},
+		{
+			"path": "docs"
 		}
 	]
 }
