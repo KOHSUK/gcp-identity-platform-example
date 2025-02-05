@@ -39,7 +39,8 @@ code_client=$(hydra create client \
     --response-type code,id_token \
     --format json \
     --scope openid --scope offline \
-    --redirect-uri http://127.0.0.1:5173/callback)
+    --token-endpoint-auth-method none
+    --redirect-uri http://localhost:3000/callback)
 
 code_client_id=$(echo $code_client | jq -r '.client_id')
 code_client_secret=$(echo $code_client | jq -r '.client_secret')
@@ -63,3 +64,4 @@ hydra perform authorization-code \
     --port 5173 \
     --scope openid --scope offline
 ```
+

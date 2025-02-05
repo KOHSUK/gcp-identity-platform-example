@@ -4,7 +4,14 @@
 			"path": "."
 		},
 		{
-			"path": "web"
+			"path": "web",
+			"name": "auth-ui"
+		},
+		{
+			"path": "client"
+		},
+		{
+			"path": "web-vite"
 		},
 		{
 			"path": "ory"
@@ -12,5 +19,8 @@
 		{
 			"path": "docs"
 		}
-	]
+	],
+	"settings": {
+		"editor.tabSize": 2
+	}
 }

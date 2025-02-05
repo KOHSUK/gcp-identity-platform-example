@@ -1,13 +1,31 @@
 serve:
   cookies:
     same_site_mode: Lax
+  public:
+    cors:
+      enabled: true
+      allowed_origins:
+        - http://localhost:3000
+        - http://127.0.0.1:3000
+        - http://localhost:5173
+        - http://127.0.0.1:5173
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+      exposed_headers:
+        - Content-Type
 
 urls:
   self:
-    issuer: http://127.0.0.1:4444
-  consent: http://127.0.0.1:5173/consent
-  login: http://127.0.0.1:5173/login
-  logout: http://127.0.0.1:5173/logout
+    issuer: http://localhost:4444
+  consent: http://localhost:5173/consent
+  login: http://localhost:5173/login
+  logout: http://localhost:5173/logout
 
 secrets:
   system:
