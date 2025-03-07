@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package tenants.tenantspb.v1;
+
+option go_package = "app/internal/gen/proto/tenants/tenantspb/v1;tenantsv1";
+
+message Tenant {
+  string id = 1;
+  string name = 2;
+}

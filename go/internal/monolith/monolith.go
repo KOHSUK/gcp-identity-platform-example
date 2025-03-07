@@ -4,14 +4,16 @@ import (
 	"app/internal/config"
 	"app/internal/waiter"
 	"context"
-	"database/sql"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5"
+	"github.com/rs/zerolog"
 )
 
 type Monolith interface {
 	Config() config.AppConfig
-	DB() *sql.DB
+	DB() *pgx.Conn
+	Logger() zerolog.Logger
 	Mux() *chi.Mux
 	Waiter() waiter.Waiter
 }

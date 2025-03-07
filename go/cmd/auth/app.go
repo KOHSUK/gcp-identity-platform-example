@@ -5,18 +5,20 @@ import (
 	"app/internal/monolith"
 	"app/internal/waiter"
 	"context"
-	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/rs/zerolog"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"golang.org/x/sync/errgroup"
 )
 
 type app struct {
 	cfg     config.AppConfig
-	db      *sql.DB
+	db      *pgx.Conn
 	logger  zerolog.Logger
 	modules []monolith.Module
 	mux     *chi.Mux
@@ -27,7 +29,7 @@ func (a *app) Config() config.AppConfig {
 	return a.cfg
 }
 
-func (a *app) DB() *sql.DB {
+func (a *app) DB() *pgx.Conn {
 	return a.db
 }
 
@@ -55,13 +57,16 @@ func (a *app) startupModules() error {
 
 func (a *app) waitForWeb(ctx context.Context) error {
 	webServer := &http.Server{
-		Addr:    a.cfg.Web.Address(),
-		Handler: a.mux,
+		Addr: a.cfg.Web.Address(),
+		// Handler: a.mux,
+		// Use h2c so we can serve HTTP/2 without TLS.
+		// TODO: Use TLS in production. See https://connectrpc.com/docs/go/deployment
+		Handler: h2c.NewHandler(a.mux, &http2.Server{}),
 	}
 
 	group, gCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
-		fmt.Printf("web server started; listeningat http://localhost%s\n", a.cfg.Web.Port)
+		fmt.Printf("web server started; listening at http://localhost%s\n", a.cfg.Web.Port)
 		defer fmt.Println("web server shutdown")
 		if err := webServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			return err

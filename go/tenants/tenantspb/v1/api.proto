@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package tenants.tenantspb.v1;
+
+option go_package = "app/internal/gen/proto/tenants/tenantspb/v1;tenantsv1";
+
+import "tenants/tenantspb/v1/messages.proto";
+
+service TenantsService {
+  rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
+  rpc GetTenant(GetTenantRequest) returns (GetTenantResponse);
+}
+
+message CreateTenantRequest {
+  string name = 1;
+}
+
+message CreateTenantResponse {
+  string id = 1;
+}
+
+message GetTenantRequest {
+  string id = 1;
+}
+
+message GetTenantResponse {
+  Tenant tenant = 1;
+}

@@ -6,11 +6,14 @@ import (
 	"app/internal/monolith"
 	"app/internal/waiter"
 	"app/internal/web"
-	"database/sql"
+	"app/tenants"
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/rs/zerolog"
 )
 
@@ -32,21 +35,27 @@ func run() (err error) {
 
 	// init infrastructure...
 	// init db
-	m.db, err = sql.Open("pgx", cfg.PG.Conn)
+
+	// TODO: "github.com/jackc/pgx/v5/pgxpool"を使うように修正
+	m.db, err = pgx.Connect(context.Background(), cfg.PG.Conn)
 	if err != nil {
 		return err
 	}
-	defer func(db *sql.DB) {
-		err := db.Close()
+
+	defer func(db *pgx.Conn) {
+		err := db.Close(context.Background())
 		if err != nil {
 			return
 		}
 	}(m.db)
+
 	m.logger = initLogger(cfg)
 	m.mux = initMux(cfg.Web)
 	m.waiter = waiter.New(waiter.CatchSignals())
 
-	m.modules = []monolith.Module{}
+	m.modules = []monolith.Module{
+		&tenants.Module{},
+	}
 
 	if err = m.startupModules(); err != nil {
 		return err
@@ -69,4 +78,16 @@ func initLogger(cfg config.AppConfig) zerolog.Logger {
 
 func initMux(_ web.WebConfig) *chi.Mux {
 	return chi.NewMux()
+}
+
+func walk(mux *chi.Mux) {
+	// chi.Walkを使って登録されているルートを走査する
+	err := chi.Walk(mux, func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+		fmt.Printf("Method: %s, Route: %s\n", method, route)
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("Walk error: %v\n", err)
+	}
 }

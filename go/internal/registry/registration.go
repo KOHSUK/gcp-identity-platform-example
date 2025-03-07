@@ -5,6 +5,7 @@ import (
 	"reflect"
 )
 
+// When the key matches the key of a registered event, use this function.
 func Register(reg Registry, v Registrable, s Serializer, d Deserializer, os []BuildOption) error {
 	var key string
 
@@ -22,6 +23,7 @@ func Register(reg Registry, v Registrable, s Serializer, d Deserializer, os []Bu
 	return RegisterKey(reg, key, v, s, d, os)
 }
 
+// When the key does not match the key of a registered event, use this function.
 func RegisterKey(reg Registry, key string, v any, s Serializer, d Deserializer, os []BuildOption) error {
 	t := reflect.TypeOf(v)
 

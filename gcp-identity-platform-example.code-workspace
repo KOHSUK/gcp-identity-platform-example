@@ -20,6 +20,9 @@
 			"path": "ory"
 		},
 		{
+			"path": "atlas"
+		},
+		{
 			"path": "docs"
 		}
 	],
